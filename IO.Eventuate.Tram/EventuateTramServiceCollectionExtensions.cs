@@ -1,4 +1,6 @@
 using System;
+using IO.Eventuate.Tram.Commands.Common;
+using IO.Eventuate.Tram.Commands.Producer;
 using IO.Eventuate.Tram.Consumer.Common;
 using IO.Eventuate.Tram.Consumer.Database;
 using IO.Eventuate.Tram.Consumer.Kafka;
@@ -99,6 +101,12 @@ namespace IO.Eventuate.Tram
 			serviceCollection.AddSingleton<IMessageHandlerDecorator, PrePostReceiveMessageHandlerDecorator>();
 			serviceCollection.AddSingleton<IMessageHandlerDecorator, DuplicateDetectingMessageHandlerDecorator>();
 			serviceCollection.AddSingleton<IMessageHandlerDecorator, PrePostHandlerMessageHandlerDecorator>();
+		}
+
+		public static void AddEventuateTramCommandProducer(this IServiceCollection serviceCollection)
+		{
+			serviceCollection.TryAddSingleton<ICommandTypeNamingStrategy, AttributeCommandTypeNamingStrategy>();
+			serviceCollection.TryAddScoped<ICommandProducer, CommandProducer>();
 		}
 	}
 }

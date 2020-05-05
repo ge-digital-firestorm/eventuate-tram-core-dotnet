@@ -53,7 +53,7 @@ namespace IO.Eventuate.Tram.Messaging.Producer
 			return new Message(Body, Headers);
 		}
 
-		public static MessageBuilder WithMessage(Message message) {
+		public static MessageBuilder WithMessage(IMessage message) {
 			return new MessageBuilder(message);
 		}		
 	}
