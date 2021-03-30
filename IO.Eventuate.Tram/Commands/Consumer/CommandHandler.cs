@@ -6,10 +6,10 @@ using IO.Eventuate.Tram.Messaging.Common;
 
 namespace IO.Eventuate.Tram.Commands.Consumer
 {
-	public class CommandHandler<TCommand>
+	public class CommandHandler
 	{
 		// TODO: generic used to be object...
-		private readonly Func<CommandMessage<TCommand>, PathVariables, IList<IMessage>> _handler;
+		private readonly Func<CommandMessage<object>, PathVariables, IList<IMessage>> _handler;
 
 		public CommandHandler(string channel, string resource,
 			Type commandType,
@@ -57,7 +57,7 @@ namespace IO.Eventuate.Tram.Commands.Consumer
 			return r.IsSatisfiedBy(mr);
 		}
 		
-		public IList<IMessage> InvokeMethod(CommandMessage<TCommand> commandMessage, IDictionary<string, string> pathVars)
+		public IList<IMessage> InvokeMethod(CommandMessage<object> commandMessage, IDictionary<string, string> pathVars)
 		{
 			return _handler(commandMessage, new PathVariables(pathVars));
 		}

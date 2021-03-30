@@ -25,11 +25,14 @@ namespace IO.Eventuate.Tram.Commands.Consumer
 
 		private readonly IMessageProducer _messageProducer;
 
+		private readonly ICommandTypeNamingStrategy _commandTypeNamingStrategy;
+
 		public CommandDispatcher(string commandDispatcherId,
 			CommandHandlers commandHandlers,
 			IChannelMapping channelMapping,
 			IMessageConsumer messageConsumer,
 			IMessageProducer messageProducer,
+			ICommandTypeNamingStrategy commandTypeNamingStrategy,
 			ILogger<CommandDispatcher> logger)
 		{
 			_commandDispatcherId = commandDispatcherId;
@@ -37,6 +40,7 @@ namespace IO.Eventuate.Tram.Commands.Consumer
 			_channelMapping = channelMapping;
 			_messageConsumer = messageConsumer;
 			_messageProducer = messageProducer;
+			_commandTypeNamingStrategy = commandTypeNamingStrategy;
 			_logger = logger;
 		}
 
@@ -58,13 +62,11 @@ namespace IO.Eventuate.Tram.Commands.Consumer
 			// TODO Fix logging parameters in this whole file
 			_logger.LogTrace("Received message {} {}", _commandDispatcherId, message);
 
-			CommandHandler method = _commandHandlers.FindTargetMethod(message);
+			CommandHandler method = _commandHandlers.FindTargetMethod(message, _commandTypeNamingStrategy);
 			if (method == null)
 			{
 				throw new InvalidOperationException("No method for " + message);
 			}
-
-			//CommandHandler m = possibleMethod.get();
 
 			object param = ConvertPayload(method, message.Payload);
 
@@ -74,10 +76,10 @@ namespace IO.Eventuate.Tram.Commands.Consumer
 			
 			string defaultReplyChannel = message.GetHeader(CommandMessageHeaders.ReplyTo);
 
-			List<IMessage> replies;
+			IList<IMessage> replies;
 			try
 			{
-				CommandMessage cm = new CommandMessage(message.Id, param, correlationHeaders, message);
+				var cm = new CommandMessage<object>(message.Id, param, correlationHeaders, message);
 				replies = Invoke(method, cm, pathVars);
 				_logger.LogTrace("Generated replies {} {} {}", _commandDispatcherId, message, replies);
 			}
@@ -98,7 +100,7 @@ namespace IO.Eventuate.Tram.Commands.Consumer
 			}
 		}
 
-		protected List<Message> Invoke(CommandHandler commandHandler, CommandMessage cm, IDictionary<string, string> pathVars)
+		protected IList<IMessage> Invoke(CommandHandler commandHandler, CommandMessage<object> cm, IDictionary<string, string> pathVars)
 		{
 			return commandHandler.InvokeMethod(cm, pathVars);
 		}

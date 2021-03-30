@@ -9,7 +9,7 @@ namespace IO.Eventuate.Tram.Commands.Consumer
 {
 	public class CommandHandlers
 	{
-		public CommandHandlers(IList<CommandHandler<object>> handlers)
+		public CommandHandlers(IList<CommandHandler> handlers)
 		{
 			Handlers = handlers;
 		}
@@ -19,7 +19,7 @@ namespace IO.Eventuate.Tram.Commands.Consumer
 			return Handlers.Select(h => h.Channel).ToImmutableHashSet();
 		}
 
-		public CommandHandler<object> FindTargetMethod(IMessage message, ICommandTypeNamingStrategy commandTypeNamingStrategy)
+		public CommandHandler FindTargetMethod(IMessage message, ICommandTypeNamingStrategy commandTypeNamingStrategy)
 		{
 			return Handlers.FirstOrDefault(h => h.Handles(message, commandTypeNamingStrategy));
 		}
@@ -31,6 +31,6 @@ namespace IO.Eventuate.Tram.Commands.Consumer
 		}
 
 		// TODO: object is probably not right
-		public IList<CommandHandler<object>> Handlers { get; }
+		public IList<CommandHandler> Handlers { get; }
 	}
 }
